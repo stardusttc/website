@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>卡路里大挑战</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="./static/calorie/bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./static/calorie/css/common.css">
+    <link rel="stylesheet" type="text/css" href="./static/calorie/css/index.css">
+</head>
+
+<body>
+    <div class="mask"></div>
+    <div id="bg"></div>
+    <div id="container">
+        <header>
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 margin0 padding0 width28 gobackWrap">
+                <a href="/main" class="goBack">
+                    <img src="./static/calorie/images/back.png">
+                    <span class="goBackIndex">返回首页</span>
+                </a>
+            </div>
+            <div class="col-xs-2 col-sm-2 hidden-sm hidden-md hidden-lg margin0 padding0 width12 fanIcon ">
+                <img class="" src="./static/calorie/images/avatar.png">
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-4 hidden-xs">
+                <img src="./static/calorie/images/avatar.png">
+                <span class="welcomtitle">欢迎使用{{ username }}的工具箱</span>
+            </div>
+
+            <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 pull-right">
+               
+            </div>
+        </header>
+
+        <div class="main">
+            <div class="gameWrap">
+                <div id="game">
+                    <canvas id="main" width="843" height="550">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer">
+        COPYRIGHT© {{nickname}} 2020
+    </div>
+    <script>
+        // 加载背景图片
+        var bgImg = new Image()
+        bgImg.src = './static/calorie/images/bg.png'
+
+        // 使用for循环初始化蔬菜图片数组
+        var tomatoImgAry = []
+        for (var i = 1; i <= 2; i++) {
+            var img = new Image()
+            img.src = './static/calorie/images/tomato' + i + '.png'
+            tomatoImgAry.push(img)
+        }
+
+        // 初始化西兰花图片数组
+        var broccoliImgAry = []
+        for (var i = 1; i <= 2; i++) {
+            var img = new Image()
+            img.src = './static/calorie/images/broccoli' + i + '.png'
+            broccoliImgAry.push(img)
+        }
+
+        // 初始化毒蘑菇图片数组
+        var mushroomImgAry = []
+        for (var i = 1; i <= 2; i++) {
+            var img = new Image()
+            img.src = './static/calorie/images/mushroom' + i + '.png'
+            mushroomImgAry.push(img)
+        }
+
+        // 初始化土豆图片数组
+        var potatoImgAry = []
+        for (var i = 1; i <= 2; i++) {
+            var img = new Image();
+            img.src = './static/calorie/images/potato' + i + '.png'
+            potatoImgAry.push(img)
+        }
+
+        // 初始化白萝卜图片数组
+        var radishImgAry = []
+        for (var i = 1; i <= 2; i++) {
+            var img = new Image()
+            img.src = './static/calorie/images/radish' + i + '.png'
+            radishImgAry.push(img)
+        }
+
+        // 初始化小猪图片数组，加载所有小猪图片
+        var pigImgAry = []
+        for (var i = 1; i <= 8; i ++) {
+            var img = new Image()
+            img.src = './static/calorie/images/pig' + i + '.png'
+            pigImgAry.push(img)
+        }
+
+        // 使用二维数组存储不同体型下小猪使用的图片数组
+        var pigLevel = [
+                        [pigImgAry[0], pigImgAry[1]],
+                        [pigImgAry[2], pigImgAry[3]],
+                        [pigImgAry[4], pigImgAry[5]],
+                        [pigImgAry[6], pigImgAry[7]]
+                       ]
+
+        // 定义小猪对象
+        var pig = {
+            x: 358,
+            y: 460,
+
+            // 修改小猪的imgAry属性
+            imgAry: pigLevel[0],
+
+            // 修改小猪的img属性
+            img: pigLevel[0][0],
+            
+            imgIndex: 0,
+            lastTime: 0,
+            intervalTime: 100,
+            width: 122,
+            height: 83,
+
+            // 为小猪添加卡路里属性，初始值为0
+            cal: 0
+        }
+
+        // 加载展示卡路里的背景图片
+        var calImg = new Image()
+        calImg.src = './static/calorie/images/calorie.png'
+
+        //加载挑战成功的图片
+        var successImg = new Image()
+        successImg.src = './static/calorie/images/success.png'
+
+        // 加载时间背景图片
+        var timeImg = new Image()
+        timeImg.src = './static/calorie/images/time.png'
+        
+        // 获取画布和画笔对象
+        var canvas = document.getElementById('main')
+        var ctx = canvas.getContext('2d')
+
+        // 画布宽度
+        var canvasWidth = 843
+        var canvasHeight = 550
+
+        // 围栏根部Y坐标
+        var fenceRootY = 505
+
+        // 定义函数randomVeg()随机生成蔬菜对象
+        function randomVeg() {
+            var num = parseInt(Math.random() * 5)
+            var veg = null
+
+            // 根据随机生成的数值来定义蔬菜对象
+            if (num == 0) {   
+                veg = { 
+                    imgAry: broccoliImgAry, 
+                    img: broccoliImgAry[0], 
+                    width: 74, 
+                    height: 66,
+                    cal: 20
+                }
+            } else if (num == 1) {
+                veg = { 
+                    imgAry: radishImgAry, 
+                    img: radishImgAry[0], 
+                    width: 52, 
+                    height: 92,
+                    cal: 60
+                }
+            } else if (num == 2) {
+                veg = { 
+                    imgAry: potatoImgAry, 
+                    img: potatoImgAry[0], 
+                    width: 52, 
+                    height: 72,
+                    cal: 50 
+                }
+            } else if (num == 3) {
+               veg = { 
+                    imgAry: tomatoImgAry, 
+                    img: tomatoImgAry[0], 
+                    width: 72, 
+                    height: 81,
+                    cal: 80 
+                }
+            } else if (num == 4) {
+                veg = { 
+                imgAry: mushroomImgAry, 
+                img: mushroomImgAry[0], 
+                width: 72, 
+                height: 70,
+                cal: -100 
+                }
+            } 
+
+            // 蔬菜的起始坐标x为画布宽度，即蔬菜从画布右侧出现
+            veg.x = canvasWidth
+
+            // 随机生成蔬菜的Y坐标
+            var y = parseInt(Math.random() * (fenceRootY - veg.height + 1))
+            veg.y = y
+
+            // 蔬菜数组中绘制当前蔬菜图片的下标
+            veg.imgIndex = 0
+
+            // 切换蔬菜图片时的时间戳
+            veg.lastTime = 0
+
+            // 切换蔬菜图片时的时间间隔
+            veg.intervalTime = 100
+
+            // 返回随机生成的蔬菜对象
+            return veg
+        }
+
+        // 定义数组存储随机生成的蔬菜对象
+        var vegAry = [randomVeg()]
+
+        // 创建对象key_pressed，用于记录方向键的状态（开启：true；关闭：false）
+        var key_pressed = {
+            left: false,
+            up: false,
+            right: false,
+            down: false
+        }
+
+        // 定义常量分别存储运行状态和结束状态的值
+        const GAME_RUNNING = 1
+        const GAME_OVER = -1
+
+        // 定义变量存储游戏当前所处的状态，默认为“运行”状态
+        var gameState = GAME_RUNNING
+
+        // 定义变量用于存储游戏开始时间、结束时间
+        var startTime = null
+        var endTime = null
+
+        window.onload = function() {
+            // 创建定时器，每隔1.5秒向蔬菜数组中添加一个随机生成的蔬菜对象
+            setInterval(addVeg, 1500)
+
+            // 当将要执行gameHandler()函数时，记录此时游戏开始的时间
+            startTime = new Date().getTime()
+
+            setInterval(gameHandler, 1000 / 60)
+
+            // 监听键盘按键被按下事件
+            document.onkeydown = function(e) {
+
+                // 事件触发时，更改属性值
+                var code = e.keyCode
+                if (code == 37) {
+                    key_pressed.left = true
+                } else if (code == 38) {
+                    key_pressed.up = true
+                } else if (code == 39) {
+                    key_pressed.right = true
+                } else if (code == 40) {
+                    key_pressed.down = true
+                }
+            }
+
+            // 监听键盘按键被松开事件
+            document.onkeyup = function (e) {
+                var code = e.keyCode
+                if (code == 37) {
+                    key_pressed.left = false
+                } else if (code == 38) {
+                    key_pressed.up = false
+                } else if (code == 39) {
+                    key_pressed.right = false
+                } else if (code == 40) {
+                    key_pressed.down = false
+                }
+            }
+        }
+
+        // 定义函数addVeg()，向蔬菜数组中添加一个随机生成的蔬菜对象
+        function addVeg() {
+            vegAry.push(randomVeg())
+        }
+
+        // 定时器执行的函数
+        function gameHandler() {
+            // 【提示】如果当前游戏状态为运行状态
+            if (gameState == GAME_RUNNING) {
+                // 绘制背景
+                ctx.drawImage(bgImg, 0, 0)
+
+                // 调用实现绘制蔬菜、移动蔬菜的函数
+                drawVeg()
+
+                // 调用函数drawPig()
+                drawPig()
+
+                moveVeg()
+
+                // 调用函数addAnimation()
+                addAnimation()
+
+                // 调用deleteVeg()函数
+                deleteVeg()
+
+                // 调用函数movePig()
+                movePig()
+
+                // 调用函数checkHit()
+                checkHit()
+
+                // 调用函数drawCal()
+                drawCal()
+
+                // 调用函数changeLevel()
+                changeLevel()
+
+                // 【提示】调用函数isGameOver()
+                isGameOver()
+
+                // 【提示】调用函数drawTime()
+                drawTime()
+
+            } else if (gameState == GAME_OVER) {   // 【提示】如果当前游戏状态为结束状态
+                // 【提示】当游戏状态为结束状态时，继续绘制画布中的内容
+                ctx.drawImage(bgImg, 0, 0)
+
+                drawPig()
+                drawCal()
+
+                // 绘制结束图片
+                ctx.drawImage(successImg, 230, 100)
+
+                // 设置画笔的大小、字体和颜色
+                ctx.font = '45px Arial'
+                ctx.fillStyle = '#ffffff'
+                // 【提示】计算游戏的总时长
+                var time = (endTime - startTime) / 1000
+                var timeStr = time + '秒'
+                // 绘制游戏的总时长
+                ctx.fillText(timeStr, 330, 320)
+            }
+        }
+
+        // for循环遍历蔬菜数组，依次绘制数组中的每个蔬菜
+        function drawVeg() {
+            for (var i = 0; i < vegAry.length; i++) {
+                var veg = vegAry[i]
+                ctx.drawImage(veg.img, veg.x, veg.y)
+            }
+        }
+
+        // for循环遍历蔬菜数组，依次移动数组中的每个蔬菜
+        function moveVeg() {
+            for (var i = 0; i < vegAry.length; i++) {
+                var veg = vegAry[i]
+                veg.x = veg.x - 4
+            }
+        }
+
+        // 添加参数obj用于接收需要添加动画的对象
+        function animation(obj) {
+            // 获取当前时间戳
+            var currentTime = new Date().getTime()
+
+            // 将蔬菜对象替换成传入的对象参数obj
+            if (currentTime - obj.lastTime >= obj.intervalTime) {
+                // 加 1 得到下一张图片的下标
+                obj.imgIndex = obj.imgIndex + 1
+
+                // 如果图片的下标等于数组的长度，则重置图片下标为0
+                if (obj.imgIndex == obj.imgAry.length) {
+                    obj.imgIndex = 0
+                }
+
+                // 根据下标更新需要绘制的图片
+                obj.img = obj.imgAry[obj.imgIndex]
+
+                // 记录此次切换图片时的时间戳
+                obj.lastTime = currentTime
+            }
+        }
+
+        // 定义函数addAnimation()，给所有的蔬菜角色、小猪添加动画
+        function addAnimation() {
+            // for循环遍历蔬菜数组
+            for (var i = 0; i < vegAry.length; i++) {
+                var veg = vegAry[i]
+                animation(veg)
+            }
+
+            // 为小猪添加动画
+            animation(pig)
+        }
+
+        // 定义函数deleteVeg()删除移出画布的蔬菜
+        function deleteVeg() {
+            // 倒序遍历蔬菜数组
+            for (var i = vegAry.length - 1; i >= 0; i--) {
+                var veg = vegAry[i]
+                if (veg.x <= -veg.width) {
+                    vegAry.splice(i, 1)
+                }
+            }
+        }
+
+        // 定义函数drawPig()绘制小猪
+        function drawPig() {
+            ctx.drawImage(pig.img, pig.x, pig.y)
+        }
+
+        // 定义函数movePig()，实现小猪移动
+        function movePig() {
+            // 根据键盘方向键的状态控制小猪移动
+            if (key_pressed.left == true) {
+                pig.x = pig.x - 4
+            }
+            if (key_pressed.up == true) {
+                pig.y = pig.y - 4
+            }
+            if (key_pressed.right == true) {
+                pig.x = pig.x + 4
+            }
+            if (key_pressed.down == true) {
+                pig.y = pig.y + 4
+            }
+
+            // 控制小猪不出画布边界
+            if (pig.x < 0) {
+                pig.x = 0
+            }
+            if (pig.x > canvasWidth - pig.width) {
+                pig.x = canvasWidth - pig.width
+            }
+            if (pig.y < 0) {
+                pig.y = 0
+            }
+            if (pig.y > canvasHeight - pig.height) {
+                pig.y = canvasHeight - pig.height
+            }
+        }
+
+        // 定义函数checkHit()实现小猪与蔬菜的碰撞检测功能
+        function checkHit() {
+            // 改为倒序遍历蔬菜数组
+            for (var i = vegAry.length - 1; i >= 0; i--) {
+                // 获取当前蔬菜
+                var veg = vegAry[i]
+                // 定义小猪与当前蔬菜碰撞时的最小X坐标、最大X坐标
+                var minX = veg.x - pig.width
+                var maxX = veg.x + veg.width
+
+                // 定义小猪与当前蔬菜碰撞时的最小Y坐标、最大Y坐标
+                var minY = veg.y - pig.height
+                var maxY = veg.y + veg.height
+
+                // 判断小猪的X、Y坐标是否都在碰撞范围内
+                if (pig.x >= minX && pig.x <= maxX) {
+                    if (pig.y >= minY && pig.y <= maxY) {
+
+                        // 删除当前与小猪发生碰撞的蔬菜
+                        vegAry.splice(i, 1)
+
+                        // 当小猪吃掉蔬菜后，更新小猪的卡路里
+                        pig.cal = pig.cal + veg.cal
+                    }
+                }
+            }
+        }
+
+        // 定义函数drawCal()绘制小猪的卡路里
+        function drawCal() {
+            ctx.drawImage(calImg, 30, 20)
+            // 设置文字的大小、字体
+            ctx.font = '30px Arial'
+            // 设置文字的颜色
+            ctx.fillStyle = '#8B4513'
+            // 绘制小猪的卡路里
+            ctx.fillText('' + pig.cal, 70, 55)
+        }
+
+        // 定义函数 changeLevel()实现小猪外观随卡路里变化
+        function changeLevel() {
+            // 根据不同的卡路里改变小猪的外观
+            if (pig.cal < 300) {
+                pig.imgAry = pigLevel[0]
+                pig.width = 122
+                pig.height = 83
+            } else if (pig.cal < 600) {
+                pig.imgAry = pigLevel[1]
+                pig.width = 127
+                pig.height = 88
+            } else if (pig.cal < 900) {
+                pig.imgAry = pigLevel[2]
+                pig.width = 138
+                pig.height = 105
+            } else {
+                pig.imgAry = pigLevel[3]
+                pig.width = 142
+                pig.height = 119
+            }
+        }
+
+        // 【提示】定义函数 isGameOver()，检测游戏是否结束
+        function isGameOver() {
+            // 【提示】如果小猪的卡路里大于等于900，则游戏结束
+            if (pig.cal >= 900) {
+                // 【提示】将游戏状态改为结束状态
+                gameState = GAME_OVER
+
+                // 【提示】将游戏结束时需要绘制的小猪体型设置为气球猪
+                pig.img = pigLevel[3][0]
+
+                // 【提示】当游戏结束时，记录此时的时间
+                endTime = new Date().getTime()
+            }
+        }
+
+        // 定义函数 drawTime()，实时显示游戏时间
+        function drawTime() {
+            // 获取当前时间戳
+            var currentTime = new Date().getTime()
+            // 计算游戏当前时间与开始时间的差值并取整
+            var time = (currentTime - startTime) / 1000
+            time = parseInt(time)
+
+            // 在画布上绘制时间的背景图片以及游戏时间
+            ctx.drawImage(timeImg, 593, 20)
+            ctx.font = '30px Arial'
+            ctx.fillStyle = '#8B4513'
+            ctx.fillText(time, 643, 60)
+        }
+    </script>
+    <script src="./static/calorie/js/jquery-3.3.1.min.js"></script>
+</body>
+
+</html>

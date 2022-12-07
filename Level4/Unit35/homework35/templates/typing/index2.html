@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>打字小游戏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="/static/typing/bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/typing/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/static/typing/css/index.css">
+</head>
+<body>
+    <div class = "mask"></div>
+    <div id ="bg"></div>
+    <div id="container">
+        <header>
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 margin0 padding0 width28 gobackWrap">
+                <a href="/main" class="goBack">
+                    <img src="/static/typing/images/back.png">
+                    <span class="goBackIndex">返回首页</span>
+                </a>
+            </div>
+            <div class="col-xs-2 col-sm-2 hidden-sm hidden-md hidden-lg margin0 padding0 width12 fanIcon ">
+                <img class="" src="/static/typing/images/avatar.png">
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-4 hidden-xs">
+                <img src="/static/typing/images/avatar.png">
+                <span class="welcomtitle">欢迎使用工具箱</span>
+            </div>
+
+            <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 pull-right">
+                
+            </div>
+        </header>
+    
+        <div class="main">
+            <div class="gameWrap">
+                <div id = "game">
+                    <canvas id="main" width="800" height="530">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="footer">
+        COPYRIGHT©  2020
+    </div>
+    <script>
+        // 加载背景图片
+        var bgImg = new Image()
+        bgImg.src = 'static/typing/images/bg.png'
+
+        // 加载分数背景图
+        var scoreImg = new Image()
+        scoreImg.src = 'static/typing/images/score.png'
+
+        // 加载时间背景图
+        var timeImg = new Image()
+        timeImg.src = 'static/typing/images/time.png'
+
+        // 加载Miss图片
+        var missImg = new Image()
+        missImg.src = 'static/typing/images/miss.png'
+
+        // 加载连对图片数组
+        var levelAry = []
+        for(var i = 0; i < 7; i++){
+            var levelImg = new Image()
+            levelImg.src = 'static/typing/images/level' + i + '.png'
+            levelAry.push(levelImg)
+        }
+        
+        // 定义画布的宽、高
+        var canvasWidth = 800
+        var canvasHeight = 530
+
+        // 获取画布和画笔对象
+        var canvas = document.getElementById('main')
+        var ctx = canvas.getContext('2d')
+
+        // 存储3种类型词库的数组
+        var wordsLib = [
+            [
+             { "en": "cat", "zh": "猫" }, 
+             { "en": "dog", "zh": "狗" }, 
+             { "en": "pig", "zh": "猪" }, 
+             { "en": "duck", "zh": "鸭" }, 
+             { "en": "rabbit", "zh": "兔子" }, 
+             { "en": "horse", "zh": "马" }, 
+             { "en": "elephant", "zh": "大象" }, 
+             { "en": "ant", "zh": "蚂蚁" }, 
+             { "en": "fish", "zh": "鱼" }, 
+             { "en": "bird", "zh": "鸟" }, 
+             { "en": "snake", "zh": "蛇" }, 
+             { "en": "mouse", "zh": "鼠" }, 
+             { "en": "kangaroo", "zh": "袋鼠" }, 
+             { "en": "monkey", "zh": "猴子" }, 
+             { "en": "panda", "zh": "熊猫" }, 
+             { "en": "bear", "zh": "熊" }, 
+             { "en": "lion", "zh": "狮" }, 
+             { "en": "tiger", "zh": "老虎" }, 
+             { "en": "fox", "zh": "狐狸" }, 
+             { "en": "zebra", "zh": "斑马" }, 
+             { "en": "deer", "zh": "鹿" }, 
+             { "en": "giraffe", "zh": "长颈鹿" }, 
+             { "en": "goose", "zh": "鹅" }, 
+             { "en": "hen", "zh": "母鸡" }, 
+             { "en": "turkey", "zh": "火鸡" }, 
+             { "en": "lamb", "zh": "小羊" }, 
+             { "en": "sheep", "zh": "绵羊" }, 
+             { "en": "goat", "zh": "山羊" }, 
+             { "en": "cow", "zh": "奶牛" }, 
+             { "en": "shark", "zh": "鲨鱼" }, 
+             { "en": "seal", "zh": "海豹" }
+            ],
+
+            [
+            { "en": "pen", "zh": "钢笔" }, 
+            { "en": "pencil", "zh": "铅笔" }, 
+            { "en": "pencil-case", "zh": "铅笔盒" }, 
+            { "en": "ruler", "zh": "尺子" }, 
+            { "en": "book", "zh": "书" }, 
+            { "en": "bag", "zh": "包" }, 
+            { "en": "post card", "zh": "明信片" }, 
+            { "en": "newspaper", "zh": "报纸" },
+            { "en": "schoolbag", "zh": "书包" }, 
+            { "en": "eraser", "zh": "橡皮" }, 
+            { "en": "crayon", "zh": "蜡笔" }, 
+            { "en": "sharpener", "zh": "卷笔刀" }, 
+            { "en": "story-book", "zh": "故事书" }, 
+            { "en": "notebook", "zh": "笔记本" }
+            ],
+
+            [
+             { "en": "bike", "zh": "自行车" },
+             { "en": "bus", "zh": "公共汽车" }, 
+             { "en": "train", "zh": "火车" }, 
+             { "en": "boat", "zh": "小船" }, 
+             { "en": "ship", "zh": "轮船" }, 
+             { "en": "yacht", "zh": "快艇" }, 
+             { "en": "car", "zh": "小汽车" }, 
+             { "en": "taxi", "zh": "出租车" }, 
+             { "en": "jeep", "zh": " 吉普车" }, 
+             { "en": "van", "zh": " 小货车" }, 
+             { "en": "plane", "zh": "飞机" }, 
+             { "en": "subway", "zh": "地铁" }, 
+             { "en": "motor cycle", "zh": "摩托车" }
+            ]
+        ]
+
+        // 随机生成单词数组的下标
+        var index = parseInt(Math.random() * wordsLib.length)
+
+        // 存储随机选取的词库
+        var words = wordsLib[index]
+
+        // 定义数组用来存储多个单词对象
+        var wordArray = [nextWord()]
+
+
+        // 定义变量用于存储用户输入的字符
+        var line = ''
+
+        // 定义全局变量存储单词匹配的得分
+        var score = 0
+
+        // 定义游戏总时长
+        var time = 60
+
+        // 定义变量标识单词是否miss，初始值为false
+        var isMiss = false
+
+        // 定义单词是否匹配的标识，初始值为false
+         var sign = false
+
+        // 定义计数变量count，初始值为0
+         var count = 0
+
+        window.onload = function() {
+            // 键盘按键被按下事件
+            document.onkeydown = function (e) {
+
+                // 通过keyCode判断用户按下的是否是删除键
+                if (e.keyCode == 8) {
+                    // 删除末尾的字符
+                    if (line.length > 0) {
+                        line = line.substr(0, line.length - 1)
+                    }
+                } else {
+                    // 将用户输入的字符拼接在字符串的末尾
+                    line = line + e.key
+                }
+            }
+
+            // 获取所有定时器的id
+            // 每隔2秒向单词数组中添加一个单词
+            var timerNextWord = setInterval(function () {
+                wordArray.push(nextWord())
+            }, 2000)
+
+            // 创建定时器
+            var timerCanvas = setInterval(gameHandler, 1000 / 60)
+
+            // 每隔1s时间减1
+            var timer = setInterval(function() {
+                time = time - 1
+            }, 1000)
+
+            // 60秒后清除所有的定时器，停止游戏
+            setTimeout(function() {
+                clearInterval(timer)
+                clearInterval(timerNextWord)
+                clearInterval(timerCanvas)
+
+                // 绘制时间
+                drawTime()
+                
+            }, 60 * 1000) 
+        }
+
+        function gameHandler() {
+            // 绘制背景
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+            ctx.drawImage(bgImg, 0, 0)
+
+            // 将用户输入的字符绘制在画布输入框内
+            ctx.font = "30px Arial"
+            ctx.fillStyle = "#ffffff"
+            ctx.fillText(line, 300, 470)
+
+            // 调用drawScore()绘制得分
+            drawScore()
+
+            // 调用drawTime()绘制游戏时间
+            drawTime()
+
+            // 判断如果单词miss，则绘制Miss图片
+            if (isMiss == true) {
+                ctx.drawImage(missImg, 653, 433)
+            }
+
+            // 调用函数drawWord()
+            drawWord()
+
+            // 调用函数moveWord()
+            moveWord()
+
+            // 调用函数matchWord()
+            matchWord()
+            
+            // 调用函数deleteWord()
+            deleteWord()
+
+            // 【提示】调用函数showLevel()
+            showLevel()
+        }
+
+        // 定义函数实现单词水平位置随机
+        function getWordX(word) {
+            // 与绘制文字时使用的大小和字体保持一致
+            ctx.font = "20px Arial"
+
+            // 定义单词X坐标的最小值、最大值
+            var minX = 124
+            var maxX = (canvasWidth-124) - ctx.measureText(word).width
+
+            // 定于变量x存储随机的X坐标
+            var x = parseInt(Math.random() * (maxX - minX) + minX)
+            return x
+        }
+
+        // 绘制得分
+        function drawScore() {
+            ctx.drawImage(scoreImg, 5, 5)
+            ctx.font = "20px Arial"
+            ctx.fillStyle = "#074f6d"
+            ctx.fillText('' + score, 20, 45)
+        }
+
+        // 绘制时间
+        function drawTime() {
+            ctx.drawImage(timeImg, 647, 10)
+            ctx.font = "20px Arial"
+            ctx.fillStyle = "#074f6d"
+            ctx.fillText('' + time, 670, 52)
+        }
+
+        // 定义函数绘制数组中的单词
+        function drawWord() {
+            // for循环遍历单词数组
+            for (var i = 0; i < wordArray.length; i++) {
+                // 从数组中取出当前下标对应的单词对象
+                var word = wordArray[i]
+
+                // 如果单词是显示状态绘制单词
+                if (word.isShow == true) {
+                    ctx.font = "20px Arial"
+                    ctx.fillStyle = "#ffffff"
+                    ctx.fillText(word.text, word.x, word.y)
+
+                    // 绘制已匹配部分字符
+                    ctx.fillStyle = "#ffff00"
+                    ctx.fillText(word.m, word.x, word.y)
+                }
+            }
+        }
+        
+        // 定义函数移动数组中的单词
+        function moveWord() {
+            // for循环遍历单词数组
+            for (var i = 0; i < wordArray.length; i++) {
+                // 从数组中取出当前下标对应的单词对象
+                var word = wordArray[i]
+
+                // 如果单词是显示状态
+                if (word.isShow == true) {
+                    // 实现单词向下移动
+                    word.y = word.y + 0.5
+
+                    // 如果单词的Y坐标 >= 400，修改单词状态为消失状态
+                    if (word.y >= 400) {
+                        word.isShow = false
+
+                        // 【提示】将标识 isMiss 的值设为true，表示单词 miss
+                        isMiss = true
+
+                        // 【提示】创建定时器，0.5秒后isMiss的值改为false
+                        setTimeout(function(){
+                            isMiss = false
+                        }, 500)
+
+                        // 【提示】如果单词miss，则count清零
+                        count = 0
+                    }
+                }
+            }
+        }
+
+        // 将随机选取单词并生成单词对象的代码封装到函数中
+        function nextWord() {
+            //  随机生成词库数组的下标
+            var i = parseInt(Math.random() * words.length)
+
+            // 创建一个空对象，用于生成单词对象
+            var word = {}
+            // 单词中英文拼接
+            word.text = words[i].en + ' ' + words[i].zh
+            // 随机生成单词对象的X坐标
+            var x = getWordX(word.text)
+
+            // 定义单词对象的起始X、Y坐标
+            word.x = x
+            word.y = 0
+
+            // 设置单词的起始状态
+            word.isShow = true 
+
+            // 把单词的英文存储在对象word中
+            word.en = words[i].en
+
+            // 为单词对象添加属性，用于存储已匹配字符
+            word.m = ''
+
+            // 返回单词对象
+            return word    
+        }
+
+        // 定义函数matchWord()实现单词匹配功能
+        function matchWord() {
+            // 定义用于判断匹配是否成功的标识，初始值为false
+            var flag = false
+            // for循环遍历单词数组
+            for (var i = 0; i < wordArray.length; i++) {
+                // 依次取出数组中的值
+                var word = wordArray[i]
+                // 当单词为显示状态时，用户输入的字符匹配单词的英文
+                if (word.isShow == true) {
+                    var index = word.en.indexOf(line)
+                    // 判断用户输入的字符是否与单词的英文部分完全匹配
+                    if (index == 0) {
+                        if (word.en.length == line.length) {
+                            // 如果完全匹配，标识的值为true
+                            flag = true
+                            // 将单词的状态改为消失状态
+                            word.isShow = false
+                            // 当有单词完全匹配时，分数增加100
+                            score = score + 100
+
+                            // 【提示】当单词匹配成功时，sign 标识的值设为true
+                            sign = true
+
+                            // 【提示】如果单词匹配成功，则计数加1
+                            count = count + 1
+                            
+                            // 【提示】创建定时器，0.5秒后sign的值变为false
+                            setTimeout(function(){
+                                sign = false
+                            }, 500)
+
+                        }
+                        // 存储单词与用户输入已匹配部分
+                        word.m = line
+
+                    } else {
+                        // 当单词与用户输入的字符不匹配时，将已部分匹配字符设为空
+                        word.m = ''
+                    }
+                }
+            }
+            // 如果完全匹配，清空输入框
+            if (flag == true) {
+                line = ''
+            }
+        }
+
+        // 定义函数deleteWord()删除消失的单词
+        function deleteWord() {
+            // 倒序遍历随机添加单词的数组
+            for (var i = wordArray.length - 1; i >= 0; i--) {
+                // 依次取出数组中的值
+                var word = wordArray[i]
+                // 如果单词处于消失状态，则从单词数组中删除
+                if (word.isShow == false) {
+                    wordArray.splice(i, 1)
+                }
+            }
+        }
+
+        // 【提示】定义函数showLevel()实现单词连对表现功能
+            // 【提示】如果单词匹配不成功则不会执行下面的语句
+            // 【提示】当单词连对达到5∼10之间绘制连击图片
+            // 【提示】否则如果当单词连对达到10∼30之间绘制超神图片
+            // 【提示】否则如果当单词连对达到30时绘制MVP图片
+        function showLevel(){
+            if (sign == false){
+                return
+            }
+            
+            if (count >= 5 && count < 10){
+                ctx.drawImage(levelAry[count - 5], 653, 433)
+            }
+            else if (count >= 10 && count < 30){
+                ctx.drawImage(levelAry[5], 653, 433)
+            }
+            else if (count == 30){
+                ctx.drawImage(levelAry[6], 653, 433)
+            }
+        }        
+            
+        
+    </script>
+    <script src="./static/calorie/js/jquery-3.3.1.min.js"></script>
+</body>
+
+</html>
