@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线翻译 - Pikabear's Web</title>
+</head>
+<body>
+<h1>在线翻译 - Pikabear's Web</h1>
+<form action="/do_trans">
+    <input type="radio" name="op" value="英译汉" checked/>英译汉
+    <input type="radio" name="op" value="汉译英"/>汉译英
+    <br>
+    <textarea name="txt" cols="20" rows="10" required>{{t_txt}}</textarea>
+    <textarea  cols="20" rows="10" readonly>{{t_result}}</textarea>
+
+    <input type="submit" value="翻译">
+
+</form>
+
+<script src="static/js/trans.js"></script>
+
+</body>
+</html>

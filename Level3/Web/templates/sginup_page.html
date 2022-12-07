@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎注册 - Piakbaer's Web</title>
+</head>
+<body>
+<h3 align="leaft" style="color:black">当前时间：{{t_time}}</h3>
+<h1>请填写你的用户名、密码等信息：（带*号为必填）</h1>
+<form action="/sgin_up_ok">
+    用户名：*<input type="text" name="nickname" required>（最好让别人能记住这个名字！）
+    <br>
+    密码：*<input type="text" name="password" required>（建议避免使用其他网站或常用密码）
+    <br>
+    邮箱（目前没有任何作用，不会给您发送垃圾邮件）：<input type="text" name="email">
+    <br>
+    性别（保护账户用）：<input type="radio" name="gander" value="male"/>男生
+        <input type="radio" name="gander" value="female"/>女生
+        <input type="radio" name="gander" value="other"/>其他性别
+        <input type="radio" name="gander" value="no"/>不愿意透露
+        <br>
+    您的幸运数字（保护账户用）：<input type="radio" name="shuzi" value="1"/>1
+        <input type="radio" name="shuzi" value="2"/>2
+        <input type="radio" name="shuzi" value="3"/>3
+        <input type="radio" name="shuzi" value="4"/>4
+        <input type="radio" name="shuzi" value="5"/>5
+        <input type="radio" name="shuzi" value="6"/>6
+        <input type="radio" name="shuzi" value="7"/>7
+        <input type="radio" name="shuzi" value="8"/>8
+        <input type="radio" name="shuzi" value="9"/>9
+        <input type="radio" name="shuzi" value="0"/>0
+        <br>
+    <input type="submit" value="提交注册">
+    <br>
+    <a href="/login">已经有了一个账户？点我前去登录！</a>
+
+</body>
+</html>

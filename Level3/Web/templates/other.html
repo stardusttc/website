@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>分站 - Pikabear's Web</title>
+    <link rel="stylesheet" href="../static/bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/common.css">
+    <link rel="stylesheet" href="../static/css/main.css">
+</head>
+<body>
+    <div class="mask"></div>
+    <div class="box">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="navbar-header col-md-8 col-lg-8">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="navbar-brand pl" href="javascript:;">
+                            <img class="hidden-md hidden-lg pull-left" height="60" src="../static/images/avatar.png" alt="">
+                            <div class="pull-left  mynav_leftuser pl">
+                                <p>当前时间：{{t_time}}</p>
+                                <div class="mynav_user"><img class="hidden-sm hidden-xs vm"  height="60"  src="../static/images/avatar.png">欢迎来到Pikabear的网站</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse navbar-collapse mobiologinangregist" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <a class="loginBtn" href="/login">登录</a>/
+                                <a class="registBtn" href="/sgin-up">注册</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="mainContiner container-fluid">
+            <div class="boxone row">
+                <div class="mainTitle col-xs-12">主页/分站</div>
+                <div class="shape1 col-xs-6 col-sm-6 col-md-4 col-lg-4"><a href="/csair">中国三文鱼航空官网</a></div>
+                <div class="shape1 col-xs-6 col-sm-6 col-md-4 col-lg-4"><a href="/creepercraft">Creeper Craft工作室官网</a></div>
+                <div class="shape1 col-xs-6 col-sm-6 col-md-4 col-lg-4"><a href="/salmonaviation">三文鱼航空集团官网</a></div>
+            </div>
+            <div class="boxtwo row" class="manypeopleplay">
+                <div class="mainTitle maintitleTwo col-xs-12">其他</div>
+                <div class="shape2 col-xs-12 col-sm-12 col-md-6 col-lg-6"><a href="/">返回欢迎页面</a></div>
+            </div>
+        </div>
+    </div>
+    <script src="../static/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>
